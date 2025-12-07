@@ -1,25 +1,28 @@
 # Urdu Deepfake Audio Detection
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](http://urdu-deepfake-detection-ws3jnz5mc4syxa4ysrufph.streamlit.app/)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://urdu-deepfake-detectiongi-cve2pod7ih3amhdzoe6m3y.streamlit.app/)
 
 A machine learning application for detecting deepfake audio in Urdu using four trained models: SVM, Logistic Regression, Perceptron, and Deep Neural Network.
 
 ## 🚀 Live Demo
 
-Try the live application: **[Launch App](http://urdu-deepfake-detection-ws3jnz5mc4syxa4ysrufph.streamlit.app/)**
+Try the live application: **[Launch App](https://urdu-deepfake-detectiongi-cve2pod7ih3amhdzoe6m3y.streamlit.app/)**
 
 ## 🎯 Features
 
-- **Multiple ML Models**: Choose from 4 different trained models
+- **Multiple ML Models**: Choose from 4 different trained models (SVM, Logistic Regression, Perceptron, DNN)
 - **Real-time Detection**: Upload and analyze audio files instantly
-- **Visual Analysis**: Interactive waveform and spectrogram visualization
-- **Confidence Scoring**: Get prediction confidence levels
-- **User-friendly Interface**: Clean, intuitive design
+- **Modern Dark UI**: Eye-catching dark theme with glassmorphism effects
+- **Visual Analysis**: Interactive waveform and spectrogram visualization with dark-themed plots
+- **Confidence Scoring**: Get prediction confidence levels with animated gauge charts
+- **Sidebar Controls**: Clean, organized interface with sidebar model selection
+- **Responsive Design**: Professional typography using Inter font with smooth animations
 
 ## 📋 Prerequisites
 
-- Python 3.10
+- Python 3.10 or 3.11
 - Audio files in WAV, MP3, M4A, or OGG format
+- For Windows: Microsoft Visual C++ Redistributable (for TensorFlow)
 
 ## 🚀 Quick Start
 
@@ -27,7 +30,7 @@ Try the live application: **[Launch App](http://urdu-deepfake-detection-ws3jnz5m
 
 1. **Clone the repository**:
 ```bash
-git clone https://github.com/taqi-m/urdu-deepfake-detection.git
+git clone https://github.com/Waqas-Chohan/Urdu-Deepfake-Detection.git
 cd urdu-deepfake-detection
 ```
 
@@ -45,10 +48,10 @@ streamlit run app_deploy.py
 
 ## 🖥️ Using the App
 
-1. **Select a Model**: Choose from SVM, Logistic Regression, Perceptron, or DNN
+1. **Select a Model**: Choose from the sidebar (SVM, Logistic Regression, Perceptron, or DNN)
 2. **Upload Audio**: Upload an audio file (WAV, MP3, M4A, or OGG)
-3. **Analyze**: Click the "Analyze Audio" button
-4. **View Results**: Get prediction with confidence score and audio visualizations
+3. **Analyze**: Click the "START ANALYSIS" button
+4. **View Results**: Get prediction with confidence score, animated gauge chart, and audio visualizations in a beautiful glassmorphic interface
 
 ## 🎵 Supported Audio Formats
 
@@ -68,12 +71,15 @@ streamlit run app_deploy.py
 
 ## 🔬 Technology Stack
 
-- **Python 3.10**
-- **Streamlit** - Web application framework
-- **TensorFlow** - Deep learning models
+- **Python 3.10+**
+- **Streamlit** - Web application framework with custom CSS theming
+- **TensorFlow 2.15+** - Deep learning models
+- **Keras 3.0+** - High-level neural networks API
 - **Scikit-learn** - Machine learning algorithms
 - **Librosa** - Audio feature extraction
-- **Plotly** - Interactive visualizations
+- **Plotly** - Interactive gauge visualizations
+- **Matplotlib** - Dark-themed audio plots
+- **NumPy & Pandas** - Data processing
 
 ## 📊 Audio Features
 
@@ -127,6 +133,14 @@ This app is deployed on Streamlit Community Cloud. To deploy your own:
 - Larger files take longer to analyze
 - Consider using shorter audio clips
 
+### Windows: TensorFlow DLL Error
+- Download and install [Microsoft Visual C++ Redistributable](https://aka.ms/vs/17/release/vc_redist.x64.exe)
+- Restart your terminal/IDE after installation
+
+### Streamlit Cloud Deployment Error
+- Ensure `requirements.txt` uses compatible version ranges
+- Check that all model files (.pkl, .keras) are committed to the repository
+
 ## 📝 Usage Tips
 
 - **Audio Quality**: Use clear speech audio for best results
@@ -142,7 +156,7 @@ This app is deployed on Streamlit Community Cloud. To deploy your own:
 
 ## 🤝 Contributing
 
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/taqi-m/urdu-deepfake-detection/issues).
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/Waqas-Chohan/Urdu-Deepfake-Detection/issues).
 
 ## 📄 License
 
@@ -159,4 +173,4 @@ This project is open source and available for educational and research purposes.
 
 **Made with ❤️ for deepfake detection research**
 
-For questions or support, please [open an issue](https://github.com/taqi-m/urdu-deepfake-detection/issues).
+For questions or support, please [open an issue](https://github.com/Waqas-Chohan/Urdu-Deepfake-Detection/issues).
