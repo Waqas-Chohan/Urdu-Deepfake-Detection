@@ -16,104 +16,163 @@ import librosa.display
 st.set_page_config(
     page_title="Urdu Deepfake Audio Detection",
     page_icon="🎵",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
 # Custom CSS
 st.markdown("""
 <style>
+    /* Global Theme & Typography */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+    
+    html, body, [class*="css"] {
+        font-family: 'Inter', sans-serif;
+    }
+    
+    /* Main Background */
+    .stApp {
+        background: radial-gradient(circle at top left, #1a1c24, #0e1117);
+    }
+    
+    /* Headers */
     .main-header {
-        font-size: 3rem;
-        font-weight: bold;
-        color: #FF6B6B;
+        font-size: 3.5rem;
+        font-weight: 800;
+        background: linear-gradient(90deg, #4ECDC4, #FF6B6B);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
         text-align: center;
-        margin-bottom: 1rem;
+        margin-bottom: 0.5rem;
+        letter-spacing: -1px;
     }
+    
     .sub-header {
+        font-size: 1.25rem;
+        color: #A0AEC0;
+        text-align: center;
+        margin-bottom: 2.5rem;
+        font-weight: 400;
+    }
+    
+    .section-title {
         font-size: 1.5rem;
-        color: #4ECDC4;
-        margin-top: 2rem;
+        font-weight: 700;
+        color: #F7FAFC;
+        margin-top: 1.5rem;
         margin-bottom: 1rem;
+        border-left: 4px solid #4ECDC4;
+        padding-left: 1rem;
     }
-    .result-box {
-        padding: 2rem;
+    
+    /* Glassmorphism Containers */
+    .glass-container {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 1rem;
-        text-align: center;
-        font-size: 2rem;
-        font-weight: bold;
-        margin: 2rem 0;
-    }
-    .bonafide {
-        background-color: #d4edda;
-        color: #155724;
-        border: 3px solid #28a745;
-    }
-    .spoofed {
-        background-color: #f8d7da;
-        color: #721c24;
-        border: 3px solid #dc3545;
-    }
-    .model-card {
         padding: 1.5rem;
-        border-radius: 0.5rem;
-        border: 2px solid #e0e0e0;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        background-color: white;
-        margin: 0.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease;
     }
-    .model-card:hover {
-        border-color: #4ECDC4;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    
+    .glass-container:hover {
         transform: translateY(-2px);
+        box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+        border-color: rgba(78, 205, 196, 0.3);
     }
-    .model-card.selected {
+    
+    /* Result Cards */
+    .result-card {
+        padding: 2.5rem;
+        border-radius: 1.5rem;
+        text-align: center;
+        animation: fadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+        margin: 2rem 0;
+        backdrop-filter: blur(12px);
+    }
+    
+    .bonafide-card {
+        background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(40, 167, 69, 0.2));
+        border: 1px solid #28a745;
+        box-shadow: 0 0 30px rgba(40, 167, 69, 0.2);
+    }
+    
+    .spoofed-card {
+        background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(220, 53, 69, 0.2));
+        border: 1px solid #dc3545;
+        box-shadow: 0 0 30px rgba(220, 53, 69, 0.2);
+    }
+    
+    .result-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+    
+    .result-text {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #ffffff;
+        letter-spacing: 1px;
+    }
+    
+    .confidence-text {
+        font-size: 1.1rem;
+        color: rgba(255,255,255,0.8);
+        margin-top: 0.5rem;
+        font-weight: 500;
+    }
+    
+    /* File Uploader Customization */
+    [data-testid='stFileUploader'] {
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 1rem;
+        padding: 2rem;
+        border: 2px dashed rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    [data-testid='stFileUploader']:hover {
         border-color: #4ECDC4;
-        background-color: #e8f8f7;
-        box-shadow: 0 4px 8px rgba(78,205,196,0.3);
+        background-color: rgba(78, 205, 196, 0.05);
     }
     
-    /* Style radio buttons */
-    div[role="radiogroup"] {
-        display: flex;
-        flex-direction: row;
-        gap: 1rem;
-        flex-wrap: wrap;
+    /* Custom Sidebar */
+    [data-testid="stSidebar"] {
+        background-color: #0E1117;
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
     }
     
-    div[role="radiogroup"] label {
+    /* Buttons */
+    .stButton > button {
+        background: linear-gradient(90deg, #4ECDC4, #556270);
+        color: white;
+        border: none;
         padding: 0.75rem 1.5rem;
+        font-weight: 600;
         border-radius: 0.5rem;
         transition: all 0.3s ease;
-        cursor: pointer;
-        border: 2px solid #e0e0e0;
-        flex: 1;
-        min-width: fit-content;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        width: 100%;
     }
     
-    div[role="radiogroup"] label:hover {
-        border-color: #4ECDC4;
-        background-color: #f5fcfb;
+    .stButton > button:hover {
+        box-shadow: 0 4px 12px rgba(78, 205, 196, 0.4);
+        transform: translateY(-1px);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
     }
     
-    div[role="radiogroup"] label[data-checked="true"] {
-        background-color: #e8f8f7;
-        border-color: #4ECDC4;
-        font-weight: 600;
-    }
-    
-    /* Mobile responsive - vertical layout and full width */
-    @media (max-width: 768px) {
-        div[role="radiogroup"] {
-            flex-direction: column;
-        }
-        
-        div[role="radiogroup"] label {
-            width: 100%;
-            max-width: 100%;
-            flex: none;
-        }
+    .animate-enter {
+        animation: fadeIn 0.6s ease-out;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -257,38 +316,83 @@ def predict_audio(audio_data, sr, model_name, models, scaler, preprocessor):
 
 def plot_waveform(audio_data, sr):
     """Plot audio waveform as static image"""
+    plt.style.use('dark_background')
     fig, ax = plt.subplots(figsize=(10, 4))
+    fig.patch.set_facecolor('none')
+    ax.set_facecolor('none')
+    
     time = np.arange(0, len(audio_data)) / sr
     ax.plot(time, audio_data, color='#4ECDC4', linewidth=0.5)
-    ax.set_title('Audio Waveform', fontsize=14, fontweight='bold')
-    ax.set_xlabel('Time (seconds)', fontsize=11)
-    ax.set_ylabel('Amplitude', fontsize=11)
-    ax.grid(True, alpha=0.3)
+    ax.set_title('Audio Waveform', fontsize=12, fontweight='bold', color='white')
+    ax.set_xlabel('Time (seconds)', fontsize=10, color='gray')
+    ax.set_ylabel('Amplitude', fontsize=10, color='gray')
+    ax.tick_params(colors='gray')
+    ax.grid(True, alpha=0.1, color='white')
+    for spine in ax.spines.values():
+        spine.set_color('gray')
+        
     plt.tight_layout()
     return fig
 
 def plot_spectrogram(audio_data, sr):
     """Plot mel spectrogram as static image"""
+    plt.style.use('dark_background')
     mel_spec = librosa.feature.melspectrogram(y=audio_data, sr=sr, n_mels=128)
     mel_spec_db = librosa.power_to_db(mel_spec, ref=np.max)
     
-    fig, ax = plt.subplots(figsize=(10, 5))
+    fig, ax = plt.subplots(figsize=(10, 4))
+    fig.patch.set_facecolor('none')
+    ax.set_facecolor('none')
+    
     img = librosa.display.specshow(mel_spec_db, x_axis='time', y_axis='mel', 
-                                    sr=sr, cmap='viridis', ax=ax)
-    ax.set_title('Mel Spectrogram', fontsize=14, fontweight='bold')
-    ax.set_xlabel('Time (seconds)', fontsize=11)
-    ax.set_ylabel('Mel Frequency (Hz)', fontsize=11)
-    fig.colorbar(img, ax=ax, format='%+2.0f dB')
+                                    sr=sr, cmap='magma', ax=ax)
+    ax.set_title('Mel Spectrogram', fontsize=12, fontweight='bold', color='white')
+    ax.set_xlabel('Time (seconds)', fontsize=10, color='gray')
+    ax.set_ylabel('Mel Frequency (Hz)', fontsize=10, color='gray')
+    ax.tick_params(colors='gray')
+    
+    # Custom colorbar
+    cbar = fig.colorbar(img, ax=ax, format='%+2.0f dB')
+    cbar.ax.yaxis.set_tick_params(color='gray')
+    cbar.outline.set_edgecolor('gray')
+    plt.setp(plt.getp(cbar.ax.axes, 'yticklabels'), color='gray')
+    
     plt.tight_layout()
     return fig
 
 # Main app
 def main():
+    # Sidebar - specific container for controls
+    with st.sidebar:
+        st.markdown("### 🎛️ Control Panel")
+        st.markdown("Select detection model and settings")
+        
+        # Load models quietly first to get names
+        models_data, _, _, _ = load_models_and_data()
+        
+        if models_data:
+            selected_model = st.selectbox(
+                "Detection Model",
+                options=list(models_data.keys()),
+                index=0
+            )
+        else:
+            selected_model = None
+            
+        st.markdown("---")
+        st.markdown("""
+        <div style='background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 0.5rem; font-size: 0.8rem; color: #888;'>
+            <strong>About:</strong><br>
+            This system uses advanced machine learning to detect synthetic audio generation (Deepfakes) in Urdu language samples.
+        </div>
+        """, unsafe_allow_html=True)
+
+    # Main Area
     # Header
-    st.markdown('<div class="main-header">🎵 Urdu Deepfake Audio Detection</div>', unsafe_allow_html=True)
-    st.markdown('---')
+    st.markdown('<div class="main-header">Urdu Deepfake Detection</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">Advanced Audio Authenticity Verification System</div>', unsafe_allow_html=True)
     
-    # Load models and data
+    # Load models full
     models, scaler, preprocessor, label_mapping = load_models_and_data()
     
     if models is None:
@@ -300,37 +404,16 @@ def main():
     if 'current_file' not in st.session_state:
         st.session_state.current_file = None
     
-    # Main content
-    st.markdown('<div class="sub-header">Upload Audio File for Detection</div>', unsafe_allow_html=True)
+    # Upload Section in a beautified container
+    st.markdown('<div class="glass-container">', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">📁 Input Audio</div>', unsafe_allow_html=True)
     
     uploaded_file = st.file_uploader(
-        "Choose an audio file",
+        "Upload a WAV, MP3, or M4A file (Max 10MB)",
         type=['wav', 'mp3', 'm4a', 'ogg'],
-        help="Upload an audio file to detect if it's real or deepfake",
-        key='audio_uploader'
-    )
-    
-    # Model selection
-    st.markdown("### Select Detection Model")
-    
-    # Initialize session state for model selection if not exists
-    model_options = list(models.keys())
-    if 'selected_model' not in st.session_state:
-        st.session_state.selected_model = model_options[0]
-    
-    # Use radio buttons with vertical layout for instant UI update without rerun
-    model_name = st.radio(
-        "Choose a model:",
-        model_options,
-        index=model_options.index(st.session_state.selected_model),
-        key='model_selector',
         label_visibility="collapsed"
     )
-    
-    # Update session state
-    st.session_state.selected_model = model_name
-    
-    st.markdown("---")
+    st.markdown('</div>', unsafe_allow_html=True)
     
     if uploaded_file is not None:
         # Check if this is a new file
@@ -339,163 +422,151 @@ def main():
             st.session_state.current_file = file_id
             st.session_state.analysis_results = None
         
-        # Load audio
+        # Temporary file handling
         try:
-            # Save uploaded file temporarily for librosa to read
             temp_file_path = f"temp_audio_{uploaded_file.name}"
             with open(temp_file_path, "wb") as f:
                 f.write(uploaded_file.getbuffer())
             
-            # Load audio from temporary file
+            # Load audio
             audio_data, sr = librosa.load(temp_file_path, sr=None)
             
-            # Clean up temporary file
+            # Clean up
             if os.path.exists(temp_file_path):
                 os.remove(temp_file_path)
             
-            # Display audio player
-            uploaded_file.seek(0)  # Reset file pointer
-            st.audio(uploaded_file, format='audio/wav')
+            # 2-Column Layout for Player and Info
+            col_player, col_info = st.columns([1, 1])
             
-            # Audio info
-            duration = len(audio_data) / sr
-            st.info(f"📝 **Audio Info**: Duration: {duration:.2f}s | Sample Rate: {sr} Hz | Samples: {len(audio_data)}")
+            with col_player:
+                st.markdown('<div style="margin-top: 5px;"></div>', unsafe_allow_html=True)
+                st.audio(uploaded_file, format='audio/wav')
+                
+            with col_info:
+                duration = len(audio_data) / sr
+                st.markdown(f"""
+                <div style="display: flex; gap: 1rem; align-items: center; background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.1);">
+                    <span>⏱️ <b>{duration:.1f}s</b></span>
+                    <span>📊 <b>{sr} Hz</b></span>
+                </div>
+                """, unsafe_allow_html=True)
             
-            # Predict button
-            if st.button("🔍 Analyze Audio", type="primary", use_container_width=True):
-                with st.spinner(f'Analyzing with {model_name}...'):
+            # Analyze Button
+            if st.button("🔍 START ANALYSIS", type="primary", use_container_width=True):
+                with st.spinner(f'Processing acoustics with {selected_model}...'):
                     prediction, confidence = predict_audio(
-                        audio_data, sr, model_name, models, scaler, preprocessor
+                        audio_data, sr, selected_model, models, scaler, preprocessor
                     )
                     
                     if prediction is not None:
-                        # Store results in session state
                         st.session_state.analysis_results = {
                             'prediction': prediction,
                             'confidence': confidence,
-                            'model_name': model_name,
+                            'model_name': selected_model,
                             'audio_data': audio_data,
                             'sr': sr
                         }
             
-            # Display results if available
+            # Display Result
             if st.session_state.analysis_results is not None:
-                with st.spinner('Loading analysis results...'):
-                    results = st.session_state.analysis_results
-                    prediction = results['prediction']
-                    confidence = results['confidence']
-                    result_model_name = results['model_name']
-                    result_audio_data = results['audio_data']
-                    result_sr = results['sr']
-                    
-                    # Display result
-                    label_text = label_mapping[str(prediction)]
-                    
-                    # Calculate actual confidence (for bonafide, invert the probability)
-                    if prediction == 0:
-                        result_class = "bonafide"
-                        icon = "✅"
-                        color = "#28a745"
-                        actual_confidence = 1 - confidence  # Invert for bonafide
-                        confidence_label = "Bonafide Confidence"
-                    else:
-                        result_class = "spoofed"
-                        icon = "⚠️"
-                        color = "#dc3545"
-                        actual_confidence = confidence
-                        confidence_label = "Deepfake Confidence"
-                    
-                    st.markdown(f'<div class="result-box {result_class}">{icon} {label_text}</div>', unsafe_allow_html=True)
-                    
-                    # Confidence score
-                    col1, col2, col3 = st.columns(3)
-                    with col1:
-                        st.metric("Prediction", "Bonafide" if prediction == 0 else "Spoofed")
-                    with col2:
-                        st.metric(confidence_label, f"{actual_confidence:.2%}")
-                    with col3:
-                        st.metric("Model Used", result_model_name)
-                    
-                    # Confidence gauge
+                results = st.session_state.analysis_results
+                prediction = results['prediction']
+                confidence = results['confidence']
+                
+                # Determine class and style
+                if prediction == 0:
+                    result_type = "bonafide"
+                    icon = "🛡️"
+                    label = "BONAFIDE (REAL)"
+                    actual_confidence = 1 - confidence
+                    color = "#28a745"
+                else:
+                    result_type = "spoofed"
+                    icon = "⚠️"
+                    label = "SPOOFED (DEEPFAKE)"
+                    actual_confidence = confidence
+                    color = "#dc3545"
+                
+                # Result Card
+                st.markdown(f"""
+                <div class="result-card {result_type}-card">
+                    <span class="result-icon">{icon}</span>
+                    <div class="result-text">{label}</div>
+                    <div class="confidence-text">Confidence: {actual_confidence:.2%}</div>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                # Detailed Analysis Section
+                st.markdown('<div class="glass-container animate-enter">', unsafe_allow_html=True)
+                st.markdown('<div class="section-title">📊 Acoustic Analysis</div>', unsafe_allow_html=True)
+                
+                # Gauge Chart
+                col_gauge, col_viz = st.columns([1, 2])
+                
+                with col_gauge:
                     fig_gauge = go.Figure(go.Indicator(
-                        mode="gauge+number+delta",
+                        mode="gauge+number",
                         value=actual_confidence * 100,
                         domain={'x': [0, 1], 'y': [0, 1]},
-                        title={'text': f"{confidence_label} (%)"},
+                        title={'text': "Confidence Score", 'font': {'color': 'white', 'size': 16}},
+                        number={'font': {'color': 'white'}},
                         gauge={
-                            'axis': {'range': [0, 100]},
+                            'axis': {'range': [0, 100], 'tickcolor': "white", 'tickwidth': 2},
                             'bar': {'color': color},
+                            'bgcolor': "rgba(0,0,0,0)",
+                            'borderwidth': 2,
+                            'bordercolor': "gray",
                             'steps': [
-                                {'range': [0, 50], 'color': "lightgray"},
-                                {'range': [50, 75], 'color': "gray"},
-                                {'range': [75, 100], 'color': "darkgray"}
+                                {'range': [0, 100], 'color': "rgba(255,255,255,0.1)"}
                             ],
-                            'threshold': {
-                                'line': {'color': "red", 'width': 4},
-                                'thickness': 0.75,
-                                'value': 90
-                            }
                         }
                     ))
-                    fig_gauge.update_layout(height=300)
+                    fig_gauge.update_layout(
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        plot_bgcolor='rgba(0,0,0,0)',
+                        height=250,
+                        margin=dict(l=20, r=20, t=30, b=20)
+                    )
                     st.plotly_chart(fig_gauge, use_container_width=True)
-                    
-                    # Audio visualizations
-                    st.markdown('<div class="sub-header">Audio Analysis</div>', unsafe_allow_html=True)
-                    
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        fig_wave = plot_waveform(result_audio_data, result_sr)
+                
+                with col_viz:
+                    tab1, tab2 = st.tabs(["Waveform", "Spectrogram"])
+                    with tab1:
+                        fig_wave = plot_waveform(results['audio_data'], results['sr'])
                         st.pyplot(fig_wave, use_container_width=True)
                         plt.close(fig_wave)
-                    
-                    with col2:
-                        fig_spec = plot_spectrogram(result_audio_data, result_sr)
+                    with tab2:
+                        fig_spec = plot_spectrogram(results['audio_data'], results['sr'])
                         st.pyplot(fig_spec, use_container_width=True)
                         plt.close(fig_spec)
-            
+                
+                st.markdown('</div>', unsafe_allow_html=True)
+                
         except Exception as e:
-            st.error(f"Error loading audio file: {str(e)}")
-    
-    else:
-        # Instructions when no file is uploaded
-        st.info("👆 Please upload an audio file to begin detection")
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.markdown("### How to use:")
-            st.markdown("""
-            1. **Upload an audio file** using the file uploader above
-            2. **Select a model** for detection
-            3. **Click 'Analyze Audio'** to get the detection result
-            4. **View the results** including confidence score and visualizations
-            """)
-        
-        with col2:
-            st.markdown("### Tips for best results:")
-            st.markdown("""
-            - Use high-quality audio files
-            - WAV format provides the most accurate predictions
-            - Audio should be at least 1 second long
-            - Clear speech without background noise works best
-            """)
+            st.error(f"Error processing file: {str(e)}")
             
-            st.markdown("### Supported Formats:")
-            st.markdown("""
-            - WAV (recommended)
-            - MP3
-            - M4A
-            - OGG
-            """)
-    
-    # Footer
-    st.markdown("---")
-    st.markdown("""
-    <div style='text-align: center; color: gray;'>
-        <p>Urdu Deepfake Audio Detection System | Built with Streamlit & TensorFlow</p>
-    </div>
-    """, unsafe_allow_html=True)
+    else:
+        # Welcome / Empty State
+        st.markdown("""
+        <div style="text-align: center; padding: 4rem 2rem; color: #888;">
+            <h3>👋 Welcome to the Authenticity Lab</h3>
+            <p>Upload an audio file to begin your forensic analysis.</p>
+            <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 2rem;">
+                <div>
+                    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🎙️</div>
+                    <small>High Quality</small>
+                </div>
+                <div>
+                    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">✨</div>
+                    <small>Instant Results</small>
+                </div>
+                <div>
+                    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🔒</div>
+                    <small>Secure Process</small>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
