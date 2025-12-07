@@ -1,20 +1,18 @@
 # Audio Processing
-librosa==0.10.1
-soundfile==0.12.1
+librosa
+soundfile
 
 # Utilities
-joblib==1.3.2
+joblib
 
 # Core ML Libraries
 numpy<2.0
-pandas>=2.0.0
-scikit-learn>=1.3.0
-tensorflow>=2.15.0,<2.17.0
-keras>=3.0.0
+pandas
+scikit-learn
+tensorflow-cpu
+keras
 
 # Streamlit and Visualization
-streamlit>=1.29.0
-plotly>=5.18.0
-matplotlib>=3.8.0
-
-
+streamlit
+plotly
+matplotlib
